@@ -22,14 +22,14 @@
 
 #include <drv_xpt2046.h>
 
-#ifdef PKG_USING_XPT2046
+#ifdef PKG_USING_XPT2046_TOUCH
 
 #include <drv_gpio.h>
 
 #define LOG_TAG             "drv.xpt2046"
 #include <drv_log.h>
 
-#ifdef PKG_ST7735R_USING_KCONFIG
+#ifdef PKG_XPT2046_USING_KCONFIG
     #define PKG_XPT2046_CS      GET_PIN(PKG_XPT2046_CS_GPIO, PKG_XPT2046_CS_PIN)
     #define PKG_XPT2046_IRQ     GET_PIN(PKG_XPT2046_IRQ_GPIO, PKG_XPT2046_IRQ_PIN)
 #endif

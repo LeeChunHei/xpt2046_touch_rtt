@@ -1,14 +1,14 @@
 
 # Kconfig file for package xpt2046_touch
-menuconfig PKG_USING_XPT2046
+menuconfig PKG_USING_XPT2046_TOUCH
     bool "xpt2046 touch driver package"
     select RT_USING_TOUCH
     select RT_TOUCH_PIN_IRQ
     default n
 
-if PKG_USING_XPT2046
+if PKG_USING_XPT2046_TOUCH
 
-    config PKG_XTP2046_TOUCH_PATH
+    config PKG_XPT2046_TOUCH_PATH
         string
         default "/packages/peripherals/xpt2046_touch"
 
