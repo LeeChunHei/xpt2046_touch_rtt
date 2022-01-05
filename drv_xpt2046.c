@@ -224,15 +224,6 @@ void xpt2046_calibration(void)
     // Upper left cross
     rt_graphix_ops(lcd)->draw_hline((const char *)(&black), 0, x0+cross_size, y0);
     rt_graphix_ops(lcd)->draw_vline((const char *)(&black), x0, 0, y0+cross_size);
-    // Upper right cross
-    rt_graphix_ops(lcd)->draw_hline((const char *)(&black), x1-cross_size, lcd_info.width, y1);
-    rt_graphix_ops(lcd)->draw_vline((const char *)(&black), x1, 0, y1+cross_size);
-    // lower right cross
-    rt_graphix_ops(lcd)->draw_hline((const char *)(&black), x2-cross_size, lcd_info.width, y2);
-    rt_graphix_ops(lcd)->draw_vline((const char *)(&black), x2, y2-cross_size, lcd_info.height);
-    // lower left cross
-    rt_graphix_ops(lcd)->draw_hline((const char *)(&black), 0, x3+cross_size, y3);
-    rt_graphix_ops(lcd)->draw_vline((const char *)(&black), x3, y3-cross_size, lcd_info.height);
 
     touch->min_raw_x = 0;
     touch->min_raw_y = 0;
@@ -252,19 +243,39 @@ void xpt2046_calibration(void)
         rt_memset(&read_data, 0, sizeof(struct rt_touch_data));
         if (rt_device_read(touch, 0, &read_data, 1) == 1)
         {
-            rt_int32_t x_diff = (rt_in32_t)read_data.x_coordinate - (rt_in32_t)x_raw[raw_idx];
-            rt_int32_t y_diff = (rt_in32_t)read_data.y_coordinate - (rt_in32_t)y_raw[raw_idx];
-            if (abs(x_diff) > 10 || abs(y_diff) > 10)
+            x_raw[raw_idx] = read_data.x_coordinate;
+            y_raw[raw_idx++] = read_data.y_coordinate;
+            LOG_I(LOG_TAG" %d point capture", raw_idx-1);
+            for (rt_uint32_t y = 0; y < lcd_info.height; ++y)
             {
-                ++raw_idx;
+                const uint32_t white = 0xFFFFFFFF;
+                rt_graphix_ops(lcd)->draw_hline((const char *)(&white), 0, lcd_info.width, y);
             }
+            rt_thread_mdelay(1000);
             if (raw_idx >= 4)
             {
                 break;
             }
-            x_raw[raw_idx] = read_data.x_coordinate;
-            y_raw[raw_idx] = read_data.y_coordinate;
-            rt_thread_mdelay(100);
+            switch(raw_idx)
+            {
+                case 1:
+                    // Upper right cross
+                    rt_graphix_ops(lcd)->draw_hline((const char *)(&black), x1-cross_size, lcd_info.width, y1);
+                    rt_graphix_ops(lcd)->draw_vline((const char *)(&black), x1, 0, y1+cross_size);
+                    break;
+                case 2:
+                    // lower right cross
+                    rt_graphix_ops(lcd)->draw_hline((const char *)(&black), x2-cross_size, lcd_info.width, y2);
+                    rt_graphix_ops(lcd)->draw_vline((const char *)(&black), x2, y2-cross_size, lcd_info.height);
+                    break;
+                case 3:
+                    // lower left cross
+                    rt_graphix_ops(lcd)->draw_hline((const char *)(&black), 0, x3+cross_size, y3);
+                    rt_graphix_ops(lcd)->draw_vline((const char *)(&black), x3, y3-cross_size, lcd_info.height);
+                    break;
+                default:
+                    break;
+            }
         }
         rt_thread_mdelay(10);
     }
