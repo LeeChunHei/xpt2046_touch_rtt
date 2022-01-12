@@ -8,7 +8,7 @@
     "xpt2046",
     "touch"
   ],
-  "category": "peripherals",
+  "category": "peripherals/touch",
   "author": {
     "name": "LeeChunHei",
     "email": "lch19980829@gmail.com",
