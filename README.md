@@ -64,7 +64,7 @@ After opening the XPT2046 Touch driver package and selecting the corresponding f
 Burn the program to the target development board, and the user can use the touch driver protocol to read the touch point:
 
 ## 4. Example
-```
+```.c
 #include <rtdevice.h>
 #include "drv_xpt2046.h"
 
