@@ -10,7 +10,7 @@ if PKG_USING_XPT2046_TOUCH
 
     config PKG_XPT2046_TOUCH_PATH
         string
-        default "/packages/peripherals/xpt2046_touch"
+        default "/packages/peripherals/touch/xpt2046_touch"
 
     choice
         prompt "Version"
