@@ -1,6 +1,6 @@
 # XPT2046 Touch Driver
 
-[Chinese](README_ZH.md) | English
+English
 
 ## 1. Introduction
 
@@ -23,19 +23,20 @@ To use XPT2046 Touch driver package, you need to select it in the package manage
 ```
 RT-Thread online packages
     peripheral libraries and drivers --->
-        [*] xpt2046 touch driver package --->
-            [*] Setup xpt2046 touch in menuconfig --->
-                (spi0)  SPI bus connected to the xpt2046
-                ()      GPIO port number for the chip select pin
-                ()      GPIO pin number for the chip select pin
-                ()      GPIO port number for the pen pin
-                ()      GPIO pin number for the pen pin
-                (128)   Width of the touch lcd
-                (160)   Height of the touch lcd
-                (181)   Minimum raw x axis value
-                (189)   Minimum raw y axis value
-                (1871)  Maximum raw x axis value
-                (2048)  Maximum raw y axis value
+        [*] touch drivers --->
+            [*] xpt2046 touch driver package --->
+                [*] Setup xpt2046 touch in menuconfig --->
+                    (spi0)  SPI bus connected to the xpt2046
+                    ()      GPIO port number for the chip select pin
+                    ()      GPIO pin number for the chip select pin
+                    ()      GPIO port number for the pen pin
+                    ()      GPIO pin number for the pen pin
+                    (128)   Width of the touch lcd
+                    (160)   Height of the touch lcd
+                    (181)   Minimum raw x axis value
+                    (189)   Minimum raw y axis value
+                    (1871)  Maximum raw x axis value
+                    (2048)  Maximum raw y axis value
 ```
 
 The detailed description of the package options is as follows:
@@ -60,39 +61,44 @@ After selecting the options you need, use RT-Thread's package manager to automat
 ## 3. Use XPT2046 Touch Driver
 
 After opening the XPT2046 Touch driver package and selecting the corresponding function option, it will be added to the BSP project for compilation when the BSP is compiled.
-Burn the program to the target development board, and the user can use the following method to read the touch driver to read the touch point:
-
-| Function | Parameter | Action |
-|---|---|---|
-| `rt_err_t rt_device_control(rt_device_t dev, int cmd, void *arg)` | cmd: RT_ST7735R_SET_RECT, arg: rect | Set the active rect on the TFT LCD, any write action after that will fill inside that region |
-| `rt_size_t rt_device_write(rt_device_t dev, rt_off_t pos, const void *buffer, rt_size_t   size)` | pos: RT_ST7735R_WRITE_COLOR_PIXEL or RT_ST7735R_WRITE_GRAYSCALE_PIXEL | Fill the TFT LCD rect region with buffer's pixel data, one byte per pixel in grayscale pixel mode and two byte per pixel(rgb565) in color pixel mode |
+Burn the program to the target development board, and the user can use the touch driver protocol to read the touch point:
 
 ## 4. Example
 ```
 #include <rtdevice.h>
-#include "drv_st7735r.h"
+#include "drv_xpt2046.h"
 
 int main(void)
 {
-    /* Find the TFT LCD device */
-    rt_device_t lcd = rt_device_find("lcd0");
-    rt_device_open(lcd, 0);
+    //Find the touch device
+    rt_device_t touch = rt_device_find("xpt0");
 
-    for (rt_uint8_t y = 0; y < 120; ++y)
+    if (touch == RT_NULL)
     {
-        /* Set the TFT LCD rect region */
-        struct rt_st7735r_rect rect =
+        rt_kprintf("can't find device:%s\n", "xpt0");
+        while (1);
+    }
+    if (rt_device_open(touch, RT_DEVICE_FLAG_INT_RX) != RT_EOK)
+    {
+        rt_kprintf("open device failed!");
+        while (1);
+    }
+    while (1)
+    {
+        //Prepare variable to read out the touch data
+        struct rt_touch_data read_data;
+        rt_memset(&read_data, 0, sizeof(struct rt_touch_data));
+        if (rt_device_read(touch, 0, &read_data, 1) == 1)
         {
-            .x = 0,
-            .y = y,
-            .width = 120,
-            .height = 1,
-        };
-        rt_device_control(lcd, RT_ST7735R_SET_RECT, &rect);
-        /* Fill grayscale pxiels */
-        rt_uint8_t pixels[120];
-        rt_memset(pixels, y, 120);
-        rt_device_write(lcd, RT_ST7735R_WRITE_GRAYSCALE_PIXEL, pixels, 120);
+            //Print the touch coordinate and the corresponding information
+            rt_kprintf("%d %d %d %d %d\n",
+                        read_data.event,
+                        read_data.x_coordinate,
+                        read_data.y_coordinate,
+                        read_data.timestamp,
+                        read_data.width);
+        }
+        rt_thread_mdelay(10);
     }
 
     while (1)
