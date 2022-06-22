@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2021 Lee Chun Hei, Leslie
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -28,10 +28,13 @@
 
 #include "../../../components/drivers/touch/touch.h"
 
+/* cmd for Calibrate touch */
+#define RT_TOUCH_CALIBRATION (RT_DEVICE_CTRL_BASE(Touch) + 20)
+
 struct rt_xpt2046
 {
     struct rt_touch_device parent;
-    struct rt_spi_device *spi;
+    struct rt_spi_device *spi; 
     rt_uint16_t min_raw_x;
     rt_uint16_t min_raw_y;
     rt_uint16_t max_raw_x;
@@ -39,9 +42,12 @@ struct rt_xpt2046
 };
 typedef struct rt_xpt2046 *rt_xpt2046_t;
 
-rt_xpt2046_t xpt2046_user_init(char *spi_bus_name, rt_base_t cs_pin, rt_base_t irq_pin,
-                                rt_int32_t range_x, rt_int32_t range_y,
-                                rt_uint16_t min_raw_x, rt_uint16_t min_raw_y,
-                                rt_uint16_t max_raw_x, rt_uint16_t max_raw_y);
+struct calibrate_args
+{
+    char *lcd_name;
+    char *touch_name;
+};
+
 
 #endif
+
